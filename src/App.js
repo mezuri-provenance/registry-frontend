@@ -1,18 +1,19 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, {PureComponent} from 'react';
 import './App.css';
+import DataComponent, {ComponentInfo} from './DataComponent';
 
-class App extends Component {
+
+const timeSeries: ComponentInfo = {
+  name: 'time-series',
+  description: 'Represents a sequence of points over successive time',
+  version: '0.0.2'
+};
+
+class App extends PureComponent {
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <DataComponent component={timeSeries} />
       </div>
     );
   }
