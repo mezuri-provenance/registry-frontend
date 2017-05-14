@@ -99,33 +99,36 @@ function MezuriVersions({componentName, versions, getVersionUrlFragment}) {
 }
 
 
-function MezuriSource() {
+function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, children}) {
   return (
       <Route
-          path={`/${getSourceVersionsUrlFragment(':sourceName')}`}
+          path={`/${getVersionsUrlFragment(':componentName')}`}
           render={({match}) => (
               <div>
                 <div style={{float: 'left'}}>
                   <MezuriRegistryLoader
-                      urlFragment={getSourceVersionsUrlFragment(match.params.sourceName)}
+                      urlFragment={getVersionsUrlFragment(match.params.componentName)}
                       dataKey="versions"
                   >
                     <MezuriVersions
                         componentName={match.params.sourceName}
-                        getVersionUrlFragment={getSourceVersionUrlFragment}
+                        getVersionUrlFragment={getVersionUrlFragment}
                     />
                   </MezuriRegistryLoader>
                 </div>
 
                 <div style={{float: 'left'}}>
                   <Route
-                      path={`/${getSourceVersionUrlFragment(':sourceName', ':sourceVersion')}`}
+                      path={`/${getVersionUrlFragment(':componentName', ':componentVersion')}`}
                       render={({match}) => (
                           <MezuriRegistryLoader
-                              urlFragment={getSourceVersionUrlFragment(match.params.sourceName, match.params.sourceVersion)}
+                              urlFragment={getVersionUrlFragment(
+                                  match.params.componentName,
+                                  match.params.componentVersion
+                              )}
                               dataKey='componentVersion'
                           >
-                            <MezuriSourceVersion />
+                            {children}
                           </MezuriRegistryLoader>
                       )}
                   />
@@ -146,7 +149,14 @@ function App() {
           </div>
           <Route
               path={`/${getSourceUrlFragment(':sourceName')}`}
-              component={MezuriSource}
+              render={() => (
+                  <MezuriComponentHarness
+                      getVersionsUrlFragment={getSourceVersionsUrlFragment}
+                      getVersionUrlFragment={getSourceVersionUrlFragment}
+                  >
+                    <MezuriSourceVersion />
+                  </MezuriComponentHarness>
+              )}
           />
         </div>
       </Router>
