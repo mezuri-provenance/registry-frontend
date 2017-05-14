@@ -6,10 +6,11 @@ import './App.css';
 
 
 const registryBaseUrl = 'http://127.0.0.1:5000';
-const sourcesUrlFragment = 'sources';
-const getSourceUrlFragment = name => `${sourcesUrlFragment}/${name}`;
-const getSourceVersionsUrlFragment = name => `${getSourceUrlFragment(name)}/versions`;
-const getSourceVersionUrlFragment = (name, version) => `${getSourceVersionsUrlFragment(name)}/${version}`;
+const getComponentUrlFragmentByComponentType = componentType => name => `${componentType}/${name}`;
+const getComponentVersionsUrlFragmentByComponentType = componentType =>
+    name => `${getComponentUrlFragmentByComponentType(componentType)(name)}/versions`;
+const getComponentVersionUrlFragmentByComponentType = componentType =>
+    (name, version) => `${getComponentVersionsUrlFragmentByComponentType(componentType)(name)}/${version}`;
 
 const fetchJson = url => fetch(url).then(res => res.json());
 
@@ -22,7 +23,7 @@ class ComponentDisplay extends Component {
   componentDidMount() {
     const {match} = this.props;
 
-    fetch(getSourceUrlFragment(match.params.componentName))
+    fetch(getComponentUrlFragmentByComponentType()())
         .then(res => res.json())
         .then(data => this.setState({component: data.sourceVersion}));
   }
@@ -148,15 +149,28 @@ function App() {
             <h2>Mezuri Registry</h2>
           </div>
           <Route
-              path={`/${getSourceUrlFragment(':sourceName')}`}
-              render={() => (
-                  <MezuriComponentHarness
-                      getVersionsUrlFragment={getSourceVersionsUrlFragment}
-                      getVersionUrlFragment={getSourceVersionUrlFragment}
-                  >
-                    <MezuriSourceVersion />
-                  </MezuriComponentHarness>
-              )}
+              path={`/:componentType`}
+              render={({match}) => {
+                const {componentType} = match.params;
+                switch(componentType) {
+                  case 'sources':
+                    return (
+                        <MezuriComponentHarness
+                            getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
+                            getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
+                        >
+                          <MezuriSourceVersion />
+                        </MezuriComponentHarness>
+                    )
+                  default:
+                    return (
+                        <div>
+                          Invalid route
+                        </div>
+                    )
+                }
+
+              }}
           />
         </div>
       </Router>
@@ -170,7 +184,7 @@ class AppOld extends Component {
   };
 
   componentDidMount() {
-    fetch(sourcesUrlFragment)
+    fetch(getComponentUrlFragmentByComponentType())
         .then(res => res.json())
         .then(data => {
           const sources = {};
