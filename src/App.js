@@ -70,20 +70,23 @@ function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, 
       <Route
           path={`/${getVersionsUrlFragment(':componentName')}`}
           render={({match}) => (
-              <div>
-                <div style={{float: 'left'}}>
+              <div className="component">
+                <div className="component-header">
+                  {match.params.componentName}
+                </div>
+                <div className="component-version-list-pane">
                   <MezuriRegistryLoader
                       urlFragment={getVersionsUrlFragment(match.params.componentName)}
                       dataKey="versions"
                   >
                     <MezuriVersions
-                        componentName={match.params.sourceName}
+                        componentName={match.params.componentName}
                         getVersionUrlFragment={getVersionUrlFragment}
                     />
                   </MezuriRegistryLoader>
                 </div>
 
-                <div style={{float: 'left'}}>
+                <div className="component-version-pane">
                   <Route
                       path={`/${getVersionUrlFragment(':componentName', ':componentVersion')}`}
                       render={({match}) => (
@@ -109,9 +112,9 @@ function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, 
 function App() {
   return (
       <Router>
-        <div className="App">
-          <div className="App-header">
-            <h2>Mezuri Registry</h2>
+        <div className="app">
+          <div className="app-header">
+            Mezuri Registry
           </div>
           <Route
               path={`/:componentType`}
