@@ -48,89 +48,72 @@ const ComponentListItem = ({children}) => (
 );
 
 
-class MezuriSourceVersion extends Component {
+class MezuriRegistryLoader extends Component {
   state = {
-    sourceVersion: null
+    data: null
   };
 
   componentDidMount() {
-    const {sourceName, sourceVersion} = this.props.match.params;
-    fetchJson(`${registryBaseUrl}/${getSourceVersionUrlFragment(sourceName, sourceVersion)}`)
-        .then(data => {this.setState({
-          sourceVersion: data.componentVersion
-        })
-    })
+    const {urlFragment} = this.props;
+    fetchJson(`${registryBaseUrl}/${urlFragment}`).then(data => this.setState({data}))
   }
 
   render() {
-    const {sourceVersion} = this.state;
+    const {children, dataKey} = this.props;
+    const {data} = this.state;
 
     return (
         <div>
-          {sourceVersion ? (
-              <div>
-                Name: {sourceVersion.componentName}
-                <br/>
-                Version: {sourceVersion.version}
-              </div>
-          ) : (
-              <div>
-                Loading...
-              </div>
-          )}
+          {data ? React.cloneElement(React.Children.only(children), {
+            [dataKey]: data[dataKey]
+          }) : (<div>Loading...</div>)}
         </div>
     )
   }
 }
 
 
-class MezuriSourceVersions extends Component {
-  state = {
-    sourceVersions: null,
-    sourceName: null
-  };
+function MezuriSourceVersion({componentVersion}) {
+  return (
+    <div>
+      Name: {componentVersion.componentName}
+      <br/>
+      Version: {componentVersion.version}
+    </div>
+  );
+}
 
-  componentDidMount() {
-    const {sourceName} = this.props.match.params;
-    fetchJson(`${registryBaseUrl}/${getSourceVersionsUrlFragment(sourceName)}`)
-        .then(data => this.setState({
-          sourceVersions: data.versions,
-          sourceName: sourceName
-        }));
-  }
 
-  render() {
-    const {sourceName, sourceVersions} = this.state;
-    return (
-        <div>
-          <div style={{float: 'left'}}>
-            {sourceVersions ? (
-                <ul>
-                  {sourceVersions.map(versionInfo => (
-                      <li key={versionInfo.version}>
-                        <Link to={`/${getSourceVersionUrlFragment(sourceName, versionInfo.version)}`}>
-                          {versionInfo.version}
-                        </Link>
-                      </li>
-                  ))}
-                </ul>
-            ) : (
-                <div>
-                  Loading...
-                </div>
-            )}
-          </div>
-
-          <div style={{float: 'left'}}>
-            <Route
-                path={`/${getSourceVersionUrlFragment(':sourceName', ':sourceVersion')}`}
-                component={MezuriSourceVersion}
-            />
-          </div>
+function MezuriSourceVersions({sourceName, versions}) {
+  return (
+      <div>
+        <div style={{float: 'left'}}>
+          <ul>
+            {versions.map(versionInfo => (
+                <li key={versionInfo.version}>
+                  <Link to={`/${getSourceVersionUrlFragment(sourceName, versionInfo.version)}`}>
+                    {versionInfo.version}
+                  </Link>
+                </li>
+            ))}
+          </ul>
         </div>
-    )
-  }
 
+        <div style={{float: 'left'}}>
+          <Route
+              path={`/${getSourceVersionUrlFragment(':sourceName', ':sourceVersion')}`}
+              render={({match}) => (
+                  <MezuriRegistryLoader
+                      urlFragment={getSourceVersionUrlFragment(match.params.sourceName, match.params.sourceVersion)}
+                      dataKey='componentVersion'
+                  >
+                    <MezuriSourceVersion />
+                  </MezuriRegistryLoader>
+              )}
+          />
+        </div>
+      </div>
+  )
 }
 
 
@@ -138,7 +121,14 @@ function MezuriSource() {
   return (
       <Route
           path={`/${getSourceVersionsUrlFragment(':sourceName')}`}
-          component={MezuriSourceVersions}
+          render={({match}) => (
+              <MezuriRegistryLoader
+                  urlFragment={getSourceVersionsUrlFragment(match.params.sourceName)}
+                  dataKey="versions"
+              >
+                <MezuriSourceVersions sourceName={match.params.sourceName}/>
+              </MezuriRegistryLoader>
+          )}
       />
   )
 }
