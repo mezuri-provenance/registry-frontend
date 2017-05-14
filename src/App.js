@@ -5,10 +5,11 @@ import logo from './logo.svg';
 import './App.css';
 
 
-const baseUrl = 'http://127.0.0.1:5000';
-const sourcesUrl = `${baseUrl}/sources`;
-const getSourceUrl = componentName => `${sourcesUrl}/${componentName}`;
-const getSourceVersionUrl = (name, version) => `${getSourceUrl(name)}/versions/${version}`;
+const registryBaseUrl = 'http://127.0.0.1:5000';
+const sourcesUrlFragment = 'sources';
+const getSourceUrlFragment = name => `${sourcesUrlFragment}/${name}`;
+const getSourceVersionsUrlFragment = name => `${getSourceUrlFragment(name)}/versions`;
+const getSourceVersionUrlFragment = (name, version) => `${getSourceVersionsUrlFragment(name)}/${version}`;
 
 const fetchJson = url => fetch(url).then(res => res.json());
 
@@ -21,7 +22,7 @@ class ComponentDisplay extends Component {
   componentDidMount() {
     const {match} = this.props;
 
-    fetch(getSourceUrl(match.params.componentName))
+    fetch(getSourceUrlFragment(match.params.componentName))
         .then(res => res.json())
         .then(data => this.setState({component: data.sourceVersion}));
   }
@@ -54,10 +55,10 @@ class MezuriSourceVersion extends Component {
 
   componentDidMount() {
     const {sourceName, sourceVersion} = this.props.match.params;
-    fetchJson(getSourceVersionUrl(sourceName, sourceVersion)).then(data => {
-      this.setState({
-        sourceVersion: data.componentVersion
-      })
+    fetchJson(`${registryBaseUrl}/${getSourceVersionUrlFragment(sourceName, sourceVersion)}`)
+        .then(data => {this.setState({
+          sourceVersion: data.componentVersion
+        })
     })
   }
 
@@ -83,6 +84,56 @@ class MezuriSourceVersion extends Component {
 }
 
 
+class MezuriSourceVersions extends Component {
+  state = {
+    sourceVersions: null,
+    sourceName: null
+  };
+
+  componentDidMount() {
+    const {sourceName} = this.props.match.params;
+    fetchJson(`${registryBaseUrl}/${getSourceVersionsUrlFragment(sourceName)}`)
+        .then(data => this.setState({
+          sourceVersions: data.versions,
+          sourceName: sourceName
+        }));
+  }
+
+  render() {
+    const {sourceName, sourceVersions} = this.state;
+    return (
+        <div>
+          <div style={{float: 'left'}}>
+            {sourceVersions ? (
+                <ul>
+                  {sourceVersions.map(versionInfo => (
+                      <li key={versionInfo.version}>
+                        <Link to={`/${getSourceVersionUrlFragment(sourceName, versionInfo.version)}`}>
+                          {versionInfo.version}
+                        </Link>
+                      </li>
+                  ))}
+                </ul>
+            ) : (
+                <div>
+                  Loading...
+                </div>
+            )}
+          </div>
+
+          <div style={{float: 'left'}}>
+            <Route
+                path={`/${getSourceVersionUrlFragment(':sourceName', ':sourceVersion')}`}
+                component={MezuriSourceVersion}
+            />
+          </div>
+        </div>
+    )
+  }
+
+}
+
+
 function App() {
   return (
       <Router>
@@ -91,8 +142,8 @@ function App() {
             <h2>Mezuri Registry</h2>
           </div>
           <Route
-              path='/:sourceName/versions/:sourceVersion'
-              component={MezuriSourceVersion}
+              path={`/${getSourceVersionsUrlFragment(':sourceName')}`}
+              component={MezuriSourceVersions}
           />
         </div>
       </Router>
@@ -106,7 +157,7 @@ class AppOld extends Component {
   };
 
   componentDidMount() {
-    fetch(sourcesUrl)
+    fetch(sourcesUrlFragment)
         .then(res => res.json())
         .then(data => {
           const sources = {};
