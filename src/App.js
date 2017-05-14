@@ -4,8 +4,13 @@ import {BrowserRouter as Router, Link, Route} from 'react-router-dom';
 import logo from './logo.svg';
 import './App.css';
 
-const sourcesUrl = 'http://127.0.0.1:5000/sources';
-const getSourceUrl = componentName => `http://127.0.0.1:5000/sources/${componentName}`;
+
+const baseUrl = 'http://127.0.0.1:5000';
+const sourcesUrl = `${baseUrl}/sources`;
+const getSourceUrl = componentName => `${sourcesUrl}/${componentName}`;
+const getSourceVersionUrl = (name, version) => `${getSourceUrl(name)}/versions/${version}`;
+
+const fetchJson = url => fetch(url).then(res => res.json());
 
 
 class ComponentDisplay extends Component {
@@ -18,7 +23,7 @@ class ComponentDisplay extends Component {
 
     fetch(getSourceUrl(match.params.componentName))
         .then(res => res.json())
-        .then(data => this.setState({component: data.component}));
+        .then(data => this.setState({component: data.sourceVersion}));
   }
 
   render() {
@@ -42,7 +47,60 @@ const ComponentListItem = ({children}) => (
 );
 
 
-class App extends Component {
+class MezuriSourceVersion extends Component {
+  state = {
+    sourceVersion: null
+  };
+
+  componentDidMount() {
+    const {sourceName, sourceVersion} = this.props.match.params;
+    fetchJson(getSourceVersionUrl(sourceName, sourceVersion)).then(data => {
+      this.setState({
+        sourceVersion: data.componentVersion
+      })
+    })
+  }
+
+  render() {
+    const {sourceVersion} = this.state;
+
+    return (
+        <div>
+          {sourceVersion ? (
+              <div>
+                Name: {sourceVersion.componentName}
+                <br/>
+                Version: {sourceVersion.version}
+              </div>
+          ) : (
+              <div>
+                Loading...
+              </div>
+          )}
+        </div>
+    )
+  }
+}
+
+
+function App() {
+  return (
+      <Router>
+        <div className="App">
+          <div className="App-header">
+            <h2>Mezuri Registry</h2>
+          </div>
+          <Route
+              path='/:sourceName/versions/:sourceVersion'
+              component={MezuriSourceVersion}
+          />
+        </div>
+      </Router>
+  )
+}
+
+
+class AppOld extends Component {
   state = {
     sources: null,
   };
