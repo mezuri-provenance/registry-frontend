@@ -84,12 +84,12 @@ function MezuriSourceVersion({componentVersion}) {
 }
 
 
-function MezuriSourceVersions({sourceName, versions}) {
+function MezuriVersions({componentName, versions, getVersionUrlFragment}) {
   return (
       <ul>
         {versions.map(versionInfo => (
             <li key={versionInfo.version}>
-              <Link to={`/${getSourceVersionUrlFragment(sourceName, versionInfo.version)}`}>
+              <Link to={`/${getVersionUrlFragment(componentName, versionInfo.version)}`}>
                 {versionInfo.version}
               </Link>
             </li>
@@ -110,7 +110,10 @@ function MezuriSource() {
                       urlFragment={getSourceVersionsUrlFragment(match.params.sourceName)}
                       dataKey="versions"
                   >
-                    <MezuriSourceVersions sourceName={match.params.sourceName} />
+                    <MezuriVersions
+                        componentName={match.params.sourceName}
+                        getVersionUrlFragment={getSourceVersionUrlFragment}
+                    />
                   </MezuriRegistryLoader>
                 </div>
 
