@@ -134,6 +134,16 @@ class MezuriSourceVersions extends Component {
 }
 
 
+function MezuriSource() {
+  return (
+      <Route
+          path={`/${getSourceVersionsUrlFragment(':sourceName')}`}
+          component={MezuriSourceVersions}
+      />
+  )
+}
+
+
 function App() {
   return (
       <Router>
@@ -142,8 +152,8 @@ function App() {
             <h2>Mezuri Registry</h2>
           </div>
           <Route
-              path={`/${getSourceVersionsUrlFragment(':sourceName')}`}
-              component={MezuriSourceVersions}
+              path={`/${getSourceUrlFragment(':sourceName')}`}
+              component={MezuriSource}
           />
         </div>
       </Router>
