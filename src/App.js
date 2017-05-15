@@ -5,9 +5,12 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
 import React, {Component} from 'react';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {BrowserRouter as Router, Link, Route} from 'react-router-dom';
 
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import AppBar from 'material-ui/AppBar';
+
+import muiTheme from './MuiTheme';
 import './App.css';
 
 
@@ -141,11 +144,13 @@ function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, 
 function App() {
   return (
       <Router>
-        <MuiThemeProvider>
+        <MuiThemeProvider muiTheme={muiTheme}>
           <div className="app">
-            <div className="app-header">
-              Mezuri Registry
-            </div>
+            <AppBar
+                title="Mezuri Registry"
+                style={{textTransform: 'uppercase'}}
+                showMenuIconButton={false}
+            />
             <Route
                 path={`/:componentType`}
                 render={({match}) => {
