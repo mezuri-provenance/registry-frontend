@@ -19,9 +19,19 @@ class MezuriRegistryLoader extends Component {
     data: null
   };
 
+  _fetch(urlFragment) {
+    fetchJson(`${registryBaseUrl}/${urlFragment}`).then(data => this.setState({data}));
+  }
+
   componentDidMount() {
     const {urlFragment} = this.props;
-    fetchJson(`${registryBaseUrl}/${urlFragment}`).then(data => this.setState({data}))
+    this._fetch(urlFragment);
+  }
+
+  componentWillReceiveProps({urlFragment}) {
+    if (urlFragment !== this.props.urlFragment) {
+      this._fetch(urlFragment);
+    }
   }
 
   render() {
