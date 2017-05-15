@@ -5,10 +5,13 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
 import React, {Component} from 'react';
-import {BrowserRouter as Router, Link, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Link, Route, matchPath} from 'react-router-dom';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import Paper from 'material-ui/Paper'
 import AppBar from 'material-ui/AppBar';
+import {List, ListItem, makeSelectable} from 'material-ui/List'
+const SelectableList = makeSelectable(List);
 
 import muiTheme from './MuiTheme';
 import './App.css';
@@ -82,17 +85,37 @@ function MezuriInterfaceVersion({componentVersion}) {
 }
 
 
-function MezuriVersions({componentName, versions, getVersionUrlFragment}) {
+function MezuriVersions({componentName, versions, getVersionUrlFragment, location}) {
+  const currentPath = location.pathname;
+  let currentVersionIndex = undefined;
+  for (let index = 0; index < versions.length; index++) {
+    const match = matchPath(currentPath, {
+      path: `/${getVersionUrlFragment(componentName, versions[index].version)}`
+    });
+    if (match) {
+      currentVersionIndex = index;
+      break;
+    }
+  }
+
+  console.log(currentVersionIndex);
   return (
-      <ul>
-        {versions.map(versionInfo => (
-            <li key={versionInfo.version}>
-              <Link to={`/${getVersionUrlFragment(componentName, versionInfo.version)}`}>
-                {versionInfo.version}
-              </Link>
-            </li>
+      <SelectableList
+          value={currentVersionIndex}
+          style={{width: '125px'}}
+      >
+        {versions.map((versionInfo, index) => (
+            <ListItem
+                value={index}
+                key={versionInfo.version}
+                containerElement={(
+                    <Link to={`/${getVersionUrlFragment(componentName, versionInfo.version)}`} />
+                )}
+            >
+              {versionInfo.version}
+            </ListItem>
         ))}
-      </ul>
+      </SelectableList>
   )
 }
 
@@ -101,7 +124,7 @@ function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, 
   return (
       <Route
           path={`/${getVersionsUrlFragment(':componentName')}`}
-          render={({match}) => (
+          render={({match, location}) => (
               <div className="component">
                 <div className="component-header">
                   {match.params.componentName}
@@ -114,6 +137,7 @@ function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, 
                     <MezuriVersions
                         componentName={match.params.componentName}
                         getVersionUrlFragment={getVersionUrlFragment}
+                        location={location}
                     />
                   </MezuriRegistryLoader>
                 </div>
@@ -145,9 +169,10 @@ function App() {
   return (
       <Router>
         <MuiThemeProvider muiTheme={muiTheme}>
-          <div className="app">
+          <Paper className="app" zDepth={3}>
             <AppBar
                 title="Mezuri Registry"
+                className="app-header"
                 style={{textTransform: 'uppercase'}}
                 showMenuIconButton={false}
             />
@@ -183,7 +208,7 @@ function App() {
                   }
                 }}
             />
-          </div>
+          </Paper>
         </MuiThemeProvider>
       </Router>
   )
