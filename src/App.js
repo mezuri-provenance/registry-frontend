@@ -63,6 +63,15 @@ function MezuriSourceVersion({componentVersion}) {
 }
 
 
+function MezuriInterfaceVersion({componentVersion}) {
+  return (
+      <div>
+        {componentVersion.specs.description}
+      </div>
+  );
+}
+
+
 function MezuriVersions({componentName, versions, getVersionUrlFragment}) {
   return (
       <ul>
@@ -141,6 +150,15 @@ function App() {
                             getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                         >
                           <MezuriSourceVersion />
+                        </MezuriComponentHarness>
+                    );
+                  case 'interfaces':
+                    return (
+                        <MezuriComponentHarness
+                            getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
+                            getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
+                        >
+                          <MezuriInterfaceVersion />
                         </MezuriComponentHarness>
                     );
                   default:
