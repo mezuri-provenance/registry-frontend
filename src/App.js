@@ -35,13 +35,16 @@ class MezuriRegistryLoader extends Component {
   }
 
   render() {
-    const {children, dataKey} = this.props;
+    const {children, dataKey, hideLoading, _loaded, urlFragment, ...rest} = this.props;
+    const loaded = _loaded === undefined ? true : _loaded;
     const {data} = this.state;
 
     return (
         <div>
-          {data ? React.cloneElement(React.Children.only(children), {
-            [dataKey]: data[dataKey]
+          {((data && loaded) || hideLoading) ? React.cloneElement(React.Children.only(children), {
+            [dataKey]: data ? data[dataKey] : undefined,
+            _loaded: !!data && loaded,
+            ...rest
           }) : (<div>Loading...</div>)}
         </div>
     )
@@ -147,7 +150,6 @@ function App() {
                         </div>
                     )
                 }
-
               }}
           />
         </div>
