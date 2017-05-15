@@ -1,4 +1,11 @@
+import injectTapEventPlugin from 'react-tap-event-plugin';
+
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
+injectTapEventPlugin();
+
 import React, {Component} from 'react';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {BrowserRouter as Router, Link, Route} from 'react-router-dom';
 
 import './App.css';
@@ -134,43 +141,45 @@ function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, 
 function App() {
   return (
       <Router>
-        <div className="app">
-          <div className="app-header">
-            Mezuri Registry
+        <MuiThemeProvider>
+          <div className="app">
+            <div className="app-header">
+              Mezuri Registry
+            </div>
+            <Route
+                path={`/:componentType`}
+                render={({match}) => {
+                  const {componentType} = match.params;
+                  switch(componentType) {
+                    case 'sources':
+                      return (
+                          <MezuriComponentHarness
+                              getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
+                              getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
+                          >
+                            <MezuriSourceVersion />
+                          </MezuriComponentHarness>
+                      );
+                    case 'interfaces':
+                      return (
+                          <MezuriComponentHarness
+                              getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
+                              getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
+                          >
+                            <MezuriInterfaceVersion />
+                          </MezuriComponentHarness>
+                      );
+                    default:
+                      return (
+                          <div>
+                            Invalid route
+                          </div>
+                      )
+                  }
+                }}
+            />
           </div>
-          <Route
-              path={`/:componentType`}
-              render={({match}) => {
-                const {componentType} = match.params;
-                switch(componentType) {
-                  case 'sources':
-                    return (
-                        <MezuriComponentHarness
-                            getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
-                            getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
-                        >
-                          <MezuriSourceVersion />
-                        </MezuriComponentHarness>
-                    );
-                  case 'interfaces':
-                    return (
-                        <MezuriComponentHarness
-                            getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
-                            getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
-                        >
-                          <MezuriInterfaceVersion />
-                        </MezuriComponentHarness>
-                    );
-                  default:
-                    return (
-                        <div>
-                          Invalid route
-                        </div>
-                    )
-                }
-              }}
-          />
-        </div>
+        </MuiThemeProvider>
       </Router>
   )
 }
