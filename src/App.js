@@ -24,6 +24,8 @@ const getComponentVersionsUrlFragmentByComponentType = componentType =>
     name => `${getComponentUrlFragmentByComponentType(componentType)(name)}/versions`;
 const getComponentVersionUrlFragmentByComponentType = componentType =>
     (name, version) => `${getComponentVersionsUrlFragmentByComponentType(componentType)(name)}/${version}`;
+const getComponentVersionDependentsUrlFragmentByComponentType = componentType =>
+    (name, version) => `${getComponentVersionUrlFragmentByComponentType(componentType)(name, version)}/dependents`;
 
 const fetchJson = url => fetch(url).then(res => res.json());
 
@@ -85,15 +87,37 @@ function MezuriComponentInfo({componentInfo}) {
 }
 
 
-function MezuriSourceVersion({componentVersion}) {
+function MezuriDependentsInfo({dependentsInfo}) {
+  return (
+      <div>
+        Dependents: {dependentsInfo.length > 0 ? dependentsInfo.map(
+            dependentInfo => <MezuriComponentInfo key={dependentInfo} componentInfo={dependentInfo} />
+        ) : (<span>None</span>)}
+      </div>
+  );
+}
+
+
+function MezuriSourceVersion({componentVersion, getComponentVersionDependentsUrlFragment}) {
   return (
       <div>
         {componentVersion.specs.description}
         <br />
         <br />
         Dependencies: {componentVersion.specs.dependencies.length > 0 ? componentVersion.specs.dependencies.map(
-            dependencyInfo => <MezuriComponentInfo componentInfo={dependencyInfo} />
+            dependencyInfo => <MezuriComponentInfo key={dependencyInfo} componentInfo={dependencyInfo} />
         ) : <span>None</span>}
+        <br/>
+        <br/>
+        <MezuriRegistryLoader
+            urlFragment={getComponentVersionDependentsUrlFragment(
+                componentVersion.componentName,
+                componentVersion.version
+            )}
+            dataKey="dependentsInfo"
+        >
+          <MezuriDependentsInfo />
+        </MezuriRegistryLoader>
       </div>
   );
 }
@@ -204,7 +228,9 @@ function App() {
                               getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
                               getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                           >
-                            <MezuriSourceVersion />
+                            <MezuriSourceVersion
+                                getComponentVersionDependentsUrlFragment={getComponentVersionDependentsUrlFragmentByComponentType(componentType)}
+                            />
                           </MezuriComponentHarness>
                       );
                     case 'interfaces':
@@ -213,7 +239,9 @@ function App() {
                               getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
                               getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                           >
-                            <MezuriInterfaceVersion />
+                            <MezuriInterfaceVersion
+                                getComponentVersionDependentsUrlFragment={getComponentVersionDependentsUrlFragmentByComponentType(componentType)}
+                            />
                           </MezuriComponentHarness>
                       );
                     default:
