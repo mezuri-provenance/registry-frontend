@@ -139,11 +139,10 @@ function MezuriVersions({componentName, versions, getVersionUrlFragment, locatio
     }
   }
 
-  console.log(currentVersionIndex);
   return (
       <SelectableList
           value={currentVersionIndex}
-          style={{width: '125px'}}
+          style={{width: '125px', paddingTop: 0}}
       >
         {versions.map((versionInfo, index) => (
             <ListItem
@@ -161,14 +160,19 @@ function MezuriVersions({componentName, versions, getVersionUrlFragment, locatio
 }
 
 
-function MezuriComponentHarness({getVersionsUrlFragment, getVersionUrlFragment, children}) {
+function MezuriComponentHarness({componentTypeLabel, getVersionsUrlFragment, getVersionUrlFragment, children}) {
   return (
       <Route
           path={`/${getVersionsUrlFragment(':componentName')}`}
           render={({match, location}) => (
               <div className="component">
                 <div className="component-header">
-                  {match.params.componentName}
+                  <div className="component-header-type">
+                    {componentTypeLabel}
+                  </div>
+                  <div className="component-header-name">
+                    {match.params.componentName}
+                  </div>
                 </div>
                 <div className="component-version-list-pane">
                   <MezuriRegistryLoader
@@ -225,6 +229,7 @@ function App() {
                     case 'sources':
                       return (
                           <MezuriComponentHarness
+                              componentTypeLabel="SOURCE"
                               getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
                               getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                           >
@@ -236,6 +241,7 @@ function App() {
                     case 'interfaces':
                       return (
                           <MezuriComponentHarness
+                              componentTypeLabel="INTERFACE"
                               getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
                               getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                           >
