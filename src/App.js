@@ -10,6 +10,7 @@ import {BrowserRouter as Router, Link, Route, matchPath} from 'react-router-dom'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Paper from 'material-ui/Paper'
 import AppBar from 'material-ui/AppBar';
+import Chip from 'material-ui/Chip';
 import {List, ListItem, makeSelectable} from 'material-ui/List'
 const SelectableList = makeSelectable(List);
 
@@ -65,24 +66,40 @@ class MezuriRegistryLoader extends Component {
 }
 
 
-function MezuriSourceVersion({componentVersion}) {
+function MezuriComponentInfo({componentInfo}) {
+  const {componentType, componentName, componentVersion} = componentInfo;
+  const componentVersionText = `${componentName} v${componentVersion}`;
   return (
-    <div>
-      Name: {componentVersion.componentName}
-      <br/>
-      Version: {componentVersion.version}
-    </div>
+      <Chip
+          key={componentVersionText}
+          containerElement={(
+              <Link to={`/${getComponentVersionUrlFragmentByComponentType(componentType)(
+                  componentName,
+                  componentVersion
+              )}`}/>
+          )}
+      >
+        {componentVersionText}
+      </Chip>
   );
 }
 
 
-function MezuriInterfaceVersion({componentVersion}) {
+function MezuriSourceVersion({componentVersion}) {
   return (
       <div>
         {componentVersion.specs.description}
+        <br />
+        <br />
+        Dependencies: {componentVersion.specs.dependencies.length > 0 ? componentVersion.specs.dependencies.map(
+            dependencyInfo => <MezuriComponentInfo componentInfo={dependencyInfo} />
+        ) : <span>None</span>}
       </div>
   );
 }
+
+
+const MezuriInterfaceVersion = MezuriSourceVersion;
 
 
 function MezuriVersions({componentName, versions, getVersionUrlFragment, location}) {
