@@ -113,25 +113,22 @@ function MezuriDependenciesInfo({dependencyInfo}) {
 
 function MezuriDependentsInfo({dependentsInfo}) {
   return (
-      <div>
-        Dependents: <MezuriComponentsInfo componentsInfo={dependentsInfo} />
-      </div>
+    <MezuriComponentsInfo componentsInfo={dependentsInfo} />
   );
 }
 
 
 function MezuriSourceVersion({componentVersion, getComponentVersionDependentsUrlFragment}) {
+  const {specs, componentName, version} = componentVersion;
+
   return (
       <div>
-        {componentVersion.specs.description}
+        {specs.description}
         <br /><br />
-        <MezuriDependenciesInfo dependencyInfo={componentVersion.specs.dependencies} />
+        <MezuriDependenciesInfo dependencyInfo={specs.dependencies} />
         <br/><br/>
         <MezuriRegistryLoader
-            urlFragment={getComponentVersionDependentsUrlFragment(
-                componentVersion.componentName,
-                componentVersion.version
-            )}
+            urlFragment={getComponentVersionDependentsUrlFragment(componentName, version)}
             dataKey="dependentsInfo"
         >
           <MezuriDependentsInfo />
@@ -160,7 +157,7 @@ function MezuriVersions({componentName, versions, getVersionUrlFragment, locatio
   return (
       <SelectableList
           value={currentVersionIndex}
-          style={{width: '125px', paddingTop: 0}}
+          style={{paddingTop: 0}}
       >
         {versions.map((versionInfo, index) => (
             <ListItem
@@ -183,7 +180,7 @@ function MezuriComponentHarness({componentTypeLabel, getVersionsUrlFragment, get
       <Route
           path={`/${getVersionsUrlFragment(':componentName')}`}
           render={({match, location}) => (
-              <div className="component">
+              <div className="component" style={{display: 'flex', flexFlow: 'column', flex: 1}}>
                 <div className="component-header">
                   <div className="component-header-type">
                     {componentTypeLabel}
@@ -192,34 +189,40 @@ function MezuriComponentHarness({componentTypeLabel, getVersionsUrlFragment, get
                     {match.params.componentName}
                   </div>
                 </div>
-                <div className="component-version-list-pane">
-                  <MezuriRegistryLoader
-                      urlFragment={getVersionsUrlFragment(match.params.componentName)}
-                      dataKey="versions"
-                  >
-                    <MezuriVersions
-                        componentName={match.params.componentName}
-                        getVersionUrlFragment={getVersionUrlFragment}
-                        location={location}
-                    />
-                  </MezuriRegistryLoader>
-                </div>
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexFlow: 'row'
+                }}>
+                  <div className="component-version-list-pane">
+                    <MezuriRegistryLoader
+                        urlFragment={getVersionsUrlFragment(match.params.componentName)}
+                        dataKey="versions"
+                    >
+                      <MezuriVersions
+                          componentName={match.params.componentName}
+                          getVersionUrlFragment={getVersionUrlFragment}
+                          location={location}
+                      />
+                    </MezuriRegistryLoader>
+                  </div>
 
-                <div className="component-version-pane">
-                  <Route
-                      path={`/${getVersionUrlFragment(':componentName', ':componentVersion')}`}
-                      render={({match}) => (
-                          <MezuriRegistryLoader
-                              urlFragment={getVersionUrlFragment(
-                                  match.params.componentName,
-                                  match.params.componentVersion
-                              )}
-                              dataKey='componentVersion'
-                          >
-                            {children}
-                          </MezuriRegistryLoader>
-                      )}
-                  />
+                  <div style={{flex: 1}} className="component-version-pane">
+                    <Route
+                        path={`/${getVersionUrlFragment(':componentName', ':componentVersion')}`}
+                        render={({match}) => (
+                            <MezuriRegistryLoader
+                                urlFragment={getVersionUrlFragment(
+                                    match.params.componentName,
+                                    match.params.componentVersion
+                                )}
+                                dataKey='componentVersion'
+                            >
+                              {children}
+                            </MezuriRegistryLoader>
+                        )}
+                    />
+                  </div>
                 </div>
               </div>
           )}
@@ -232,7 +235,11 @@ function App() {
   return (
       <Router>
         <MuiThemeProvider muiTheme={muiTheme}>
-          <Paper className="app" zDepth={3}>
+          <Paper
+              className="app"
+              zDepth={3}
+              style={{display: 'flex', flexFlow: 'column'}}
+          >
             <AppBar
                 title="Mezuri Registry"
                 className="app-header"
