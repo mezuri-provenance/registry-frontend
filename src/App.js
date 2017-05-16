@@ -13,6 +13,7 @@ import AppBar from 'material-ui/AppBar';
 import Chip from 'material-ui/Chip';
 import {List, ListItem, makeSelectable} from 'material-ui/List'
 const SelectableList = makeSelectable(List);
+import {Table, TableBody, TableRow, TableRowColumn} from 'material-ui/Table';
 
 import muiTheme from './MuiTheme';
 import './App.css';
@@ -138,7 +139,45 @@ function MezuriSourceVersion({componentVersion, getComponentVersionDependentsUrl
 }
 
 
-const MezuriInterfaceVersion = MezuriSourceVersion;
+function MezuriInterfaceVersion({componentVersion, getComponentVersionDependentsUrlFragment}) {
+  const {specs, componentName, version} = componentVersion;
+  const {iopDeclaration} = specs;
+
+  return (
+      <div>
+        {specs.description}
+        <br/><br/>
+        <Table selectable={false}>
+          <TableBody displayRowCheckbox={false}>
+            {Object.keys(iopDeclaration).map((name, index) => (
+                    <TableRow key={name}>
+                      {index === 0 ? (
+                          <TableRowColumn style={{width: '100px'}} rowSpan={iopDeclaration.length}>
+                            Data Type
+                          </TableRowColumn>
+                      ) : ''}
+                      <TableRowColumn style={{width: '100px'}}>{name}</TableRowColumn>
+                      <TableRowColumn>{iopDeclaration[name][0]}</TableRowColumn>
+                    </TableRow>
+            ))}
+            <TableRow>
+              <TableRowColumn style={{width: '100px'}}>Dependencies</TableRowColumn>
+              <TableRowColumn colSpan={2}><MezuriComponentsInfo componentsInfo={specs.dependencies} /></TableRowColumn>
+            </TableRow>
+            <TableRow>
+              <TableRowColumn>Dependents</TableRowColumn>
+              <TableRowColumn colSpan={2}><MezuriRegistryLoader
+                  urlFragment={getComponentVersionDependentsUrlFragment(componentName, version)}
+                  dataKey="dependentsInfo"
+              >
+                <MezuriDependentsInfo />
+              </MezuriRegistryLoader></TableRowColumn>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+  );
+}
 
 
 function MezuriVersions({componentName, versions, getVersionUrlFragment, location}) {
