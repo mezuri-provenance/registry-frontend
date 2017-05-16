@@ -87,12 +87,34 @@ function MezuriComponentInfo({componentInfo}) {
 }
 
 
+function MezuriComponentsInfo({componentsInfo}) {
+  if (componentsInfo.length === 0) {
+    return <span>None</span>;
+  }
+
+  return (
+      <span>
+        {componentsInfo.map(
+            componentInfo => <MezuriComponentInfo key={componentInfo} componentInfo={componentInfo} />
+        )}
+      </span>
+  );
+}
+
+
+function MezuriDependenciesInfo({dependencyInfo}) {
+  return (
+      <div>
+        Dependencies: <MezuriComponentsInfo componentsInfo={dependencyInfo} />
+      </div>
+  );
+}
+
+
 function MezuriDependentsInfo({dependentsInfo}) {
   return (
       <div>
-        Dependents: {dependentsInfo.length > 0 ? dependentsInfo.map(
-            dependentInfo => <MezuriComponentInfo key={dependentInfo} componentInfo={dependentInfo} />
-        ) : (<span>None</span>)}
+        Dependents: <MezuriComponentsInfo componentsInfo={dependentsInfo} />
       </div>
   );
 }
@@ -102,13 +124,9 @@ function MezuriSourceVersion({componentVersion, getComponentVersionDependentsUrl
   return (
       <div>
         {componentVersion.specs.description}
-        <br />
-        <br />
-        Dependencies: {componentVersion.specs.dependencies.length > 0 ? componentVersion.specs.dependencies.map(
-            dependencyInfo => <MezuriComponentInfo key={dependencyInfo} componentInfo={dependencyInfo} />
-        ) : <span>None</span>}
-        <br/>
-        <br/>
+        <br /><br />
+        <MezuriDependenciesInfo dependencyInfo={componentVersion.specs.dependencies} />
+        <br/><br/>
         <MezuriRegistryLoader
             urlFragment={getComponentVersionDependentsUrlFragment(
                 componentVersion.componentName,
