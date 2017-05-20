@@ -214,7 +214,16 @@ function MezuriVersions({componentName, versions, getVersionUrlFragment, locatio
 }
 
 
-function MezuriComponentHarness({componentTypeLabel, getVersionsUrlFragment, getVersionUrlFragment, children}) {
+function MezuriComponentHeaderInfo({component}) {
+  return (
+      <div className="component-header-name">
+        {component.name} (<a href={component.gitRemoteUrl}>source</a>)
+      </div>
+  )
+}
+
+
+function MezuriComponentHarness({componentTypeLabel, getComponentUrlFragment, getVersionsUrlFragment, getVersionUrlFragment, children}) {
   return (
       <Route
           path={`/${getVersionsUrlFragment(':componentName')}`}
@@ -224,9 +233,12 @@ function MezuriComponentHarness({componentTypeLabel, getVersionsUrlFragment, get
                   <div className="component-header-type">
                     {componentTypeLabel}
                   </div>
-                  <div className="component-header-name">
-                    {match.params.componentName}
-                  </div>
+                  <MezuriRegistryLoader
+                      urlFragment={getComponentUrlFragment(match.params.componentName)}
+                      dataKey="component"
+                  >
+                    <MezuriComponentHeaderInfo />
+                  </MezuriRegistryLoader>
                 </div>
                 <div style={{
                   flex: 1,
@@ -294,6 +306,7 @@ function App() {
                       return (
                           <MezuriComponentHarness
                               componentTypeLabel="SOURCE"
+                              getComponentUrlFragment={getComponentUrlFragmentByComponentType(componentType)}
                               getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
                               getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                           >
@@ -306,6 +319,7 @@ function App() {
                       return (
                           <MezuriComponentHarness
                               componentTypeLabel="INTERFACE"
+                              getComponentUrlFragment={getComponentUrlFragmentByComponentType(componentType)}
                               getVersionsUrlFragment={getComponentVersionsUrlFragmentByComponentType(componentType)}
                               getVersionUrlFragment={getComponentVersionUrlFragmentByComponentType(componentType)}
                           >
