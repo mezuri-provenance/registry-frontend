@@ -15,6 +15,7 @@ import {List, ListItem, makeSelectable} from 'material-ui/List'
 const SelectableList = makeSelectable(List);
 import {Table, TableBody, TableRow, TableRowColumn} from 'material-ui/Table';
 
+import {red400, blue400, grey400} from 'material-ui/styles/colors';
 import muiTheme from './MuiTheme';
 import './App.css';
 
@@ -65,6 +66,61 @@ class MezuriRegistryLoader extends Component {
           }) : (<div>Loading...</div>)}
         </div>
     )
+  }
+}
+
+
+function MezuriBaseDeserializedDataType({dataType}) {
+  return <div style={{backgroundColor: grey400, padding: '2px', width: '75px'}}>{dataType}</div>
+}
+
+
+function MezuriDeserializedDataType({serialized, style}) {
+  const [type, contents] = serialized;
+  let actualStyle = Object.assign({}, style || {});
+
+  switch (type) {
+    case 'LIST':
+      actualStyle = Object.assign(actualStyle, {
+        backgroundColor: red400,
+      });
+
+      return (
+          <table style={actualStyle} className="deserialized">
+            <tbody>
+            <tr>
+              <td className="deserialized-label">STREAM</td>
+              <td><MezuriDeserializedDataType serialized={contents} /></td>
+            </tr>
+            </tbody>
+          </table>
+      );
+    case 'DICT':
+      actualStyle = Object.assign(actualStyle, {
+        backgroundColor: blue400,
+      });
+
+      return (
+          <table style={actualStyle} className="deserialized">
+            <tbody>
+              {Object.keys(contents).map((name, index) => (
+                  <tr key={name} className="deserialized-struct-td">
+                    {index === 0 &&
+                    <td
+                        className="deserialized-label"
+                        rowSpan={Object.keys(contents).length}
+                    >
+                      STRUCT
+                    </td>}
+                    <td className="deserialized-label">{name}</td>
+                    <td><MezuriDeserializedDataType serialized={contents[name]} /></td>
+                  </tr>
+              ))}
+            </tbody>
+          </table>
+      );
+    default:
+      return <MezuriBaseDeserializedDataType dataType={type} />;
   }
 }
 
@@ -157,7 +213,9 @@ function MezuriInterfaceVersion({componentVersion, getComponentVersionDependents
                           </TableRowColumn>
                       ) : ''}
                       <TableRowColumn style={{width: '100px'}}>{name}</TableRowColumn>
-                      <TableRowColumn>{iopDeclaration[name][0]}</TableRowColumn>
+                      <TableRowColumn>
+                        <MezuriDeserializedDataType serialized={iopDeclaration[name]} />
+                      </TableRowColumn>
                     </TableRow>
             ))}
             <TableRow>
